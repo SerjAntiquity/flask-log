@@ -28,6 +28,8 @@ class Logging(object):
 
         """
         config_log_level = app.config.get('FLASK_LOG_LEVEL', None)
+        config_log_file = app.config.get('FLASK_LOG_FILE', None)  #set log file name
+        config_log_path = app.config.get('FLASK_LOG_PATH', None)  #set abs path to log file
 
         # Set up format for default logging
         hostname = platform.node().split('.')[0]
@@ -60,17 +62,21 @@ class Logging(object):
         root_logger.setLevel(set_level)
 
         # Get everything ready to setup the syslog handlers
-        address = None
-        if os.path.exists('/dev/log'):
-            address = '/dev/log'
-        elif os.path.exists('/var/run/syslog'):
-            address = '/var/run/syslog'
+        if config_log_file and config_log_path:
+            address=os.path.join(config_log_path, config_log_file)
+            root_logger.addHandler(
+                logging.FileHandler(address)
+            )
         else:
-            address = ('127.0.0.1', 514)
-        # Add syslog handler before adding formatters
-        root_logger.addHandler(
-            SysLogHandler(address=address, facility=SysLogHandler.LOG_LOCAL0)
-        )
+            if os.path.exists('/dev/log'):
+                address = '/dev/log'
+            elif os.path.exists('/var/run/syslog'):
+                address = '/var/run/syslog'
+            else:
+                address = ('127.0.0.1', 514)
+            root_logger.addHandler(
+                SysLogHandler(address=address, facility=SysLogHandler.LOG_LOCAL0)
+            )
         self.set_formatter(formatter)
 
         return config_log_int

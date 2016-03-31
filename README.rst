@@ -24,6 +24,8 @@ application that is super simple to setup.  A basic example is:
 
   app = flask.Flask(__name__)
   app.config['FLASK_LOG_LEVEL'] = 'DEBUG'
+  app.config['FLASK_LOG_FILE'] = 'flask.log'
+  app.config['FLASK_LOG_PATH'] = '/var/log'
   flask_log = Logging(app)
   
 
